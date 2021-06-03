@@ -20,6 +20,11 @@ textacy = "^0.11.0"
 
 [tool.poetry.dev-dependencies]
 ipython = "^7.24.1"
+mypy = "^0.812"
+isort = "^5.8.0"
+autoflake = "^1.4"
+flake8 = "^3.9.2"
+black = "^21.5b2"
 
 [tool.black]
 line-length = 79

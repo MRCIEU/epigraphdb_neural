@@ -7,25 +7,24 @@ NUM_ENCODE_LIMIT = 200
 
 # dependency files
 SCISPACY_DIR = Path("/models/scispacy")
-SCISPACY_MODEL_LG = (
+SCISPACY_LG = (
     SCISPACY_DIR
     / "en_core_sci_lg-0.4.0"
     / "en_core_sci_lg"
     / "en_core_sci_lg-0.4.0"
 )
-# SCISPACY_MODEL_NER_BIONLP13CG_MD = (
+# SCISPACY_NER_BIONLP13CG_MD = (
 #     SCISPACY_DIR
 #     / "en_ner_bionlp13cg_md-0.4.0"
 #     / "en_ner_bionlp13cg_md"
 #     / "en_ner_bionlp13cg_md-0.4.0"
 # )
 
-
 # ----------------------
 # sanity check
 logger.info("Check dependent files.")
 dependent_files = [
-    SCISPACY_MODEL_LG,
+    SCISPACY_LG,
     # SCISPACY_MODEL_NER_BIONLP13CG_MD
 ]
 for _ in dependent_files:
