@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 from .apis import models
 
-TITLE = "Models API for `epigraphdb_neural`"
+TITLE = "`epigraphdb_neural` API"
 app = FastAPI(
     title=TITLE, docs_url="/"
 )
