@@ -1,7 +1,9 @@
 import time
-from typing import List
+from typing import Any, List, Dict
 
 import spacy
+import textacy
+from textacy import extract
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, validator
 from loguru import logger
@@ -18,6 +20,12 @@ elapsed_time = round(finish_time - start_time, 2)
 logger.info(f"Loading models done in {elapsed_time} seconds")
 
 router = APIRouter()
+
+# TODO: keep models api and remove main api
+# TODO: /models/xxx to /nlp/xxx
+# TODO: add GET /nlp/models
+# TODO: move models to a global module
+# TODO: black et al
 
 
 class PostEncodeInput(BaseModel):
@@ -53,4 +61,39 @@ def get_similarity(text1: str, text2: str) -> float:
     doc1 = scispacy_model_lg(text1)
     doc2 = scispacy_model_lg(text2)
     res = doc1.similarity(doc2)
+    return res
+
+
+@router.get("/models/ner")
+def get_ner(text: str):
+    def _process(ent: spacy.tokens.span.Span):
+        res = {
+            "text": ent.text,
+            "label": ent.label_,
+            "start": ent.start,
+            "end": ent.end,
+        }
+        return res
+
+    doc = scispacy_model_lg(text)
+    res = [_process(_) for _ in doc.ents]
+    return res
+
+
+@router.get("/models/svo")
+def get_svo(text: str) -> List[Dict[str, Any]]:
+    def _process(triple: textacy.extract.triples.SVOTriple):
+        subj = [_.text for _ in triple.subject]
+        verb = [_.text for _ in triple.verb]
+        obj = [_.text for _ in triple.object]
+        res = {
+            "subject": subj,
+            "verb": verb,
+            "object": obj,
+        }
+        return res
+
+    doc = scispacy_model_lg(text)
+    svos = list(extract.subject_verb_object_triples(doc))
+    res = [_process(_) for _ in svos]
     return res
