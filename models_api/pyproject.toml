@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "epigraphdb_neural_models"
+version = "0.1.0"
+description = ""
+authors = ["Yi Liu <yi6240.liu@bristol.ac.uk>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+fastapi = "^0.63"
+environs = "^6.1"
+numpy = "^1.17"
+requests = "^2.22"
+aiofiles = "^0.4.0"
+uvicorn = "^0.10.8"
+pydantic = "^1.7"
+scispacy = "^0.4"
+loguru = "^0.5.3"
+spacy = ">=0.3"
+
+[tool.poetry.dev-dependencies]
+
+[tool.black]
+line-length = 79
+exclude = '''
+
+(
+  /(
+    | \.git
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | logs
+  )/
+)
+'''
