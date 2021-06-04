@@ -20,6 +20,9 @@ dependencies:
   - requests
   - spacy
   - environs
+  - loguru
+  - icecream
+  - pydash
   - pip
   - pip:
     - nb_black
