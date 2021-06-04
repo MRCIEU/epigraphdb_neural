@@ -5,24 +5,25 @@ import textacy
 from fastapi import APIRouter
 from textacy import extract
 
-from app.nlp_models import NlpModelsEnum, nlp_models
+from app import nlp_models
 
 from . import models
 
 router = APIRouter()
 
 
-@router.get("/nlp/models", response_model=List[str])
-def get_models_list() -> List[str]:
-    available_models = [_.value for _ in NlpModelsEnum]
-    return available_models
+@router.get("/nlp/model-info")
+def get_model_info():
+    model_info = nlp_models.model_info
+    return model_info
 
 
 @router.get("/nlp/encode", response_model=List[float])
 def get_encode(
-    text: str, nlp_model: NlpModelsEnum = NlpModelsEnum.default
+    text: str,
+    nlp_model: nlp_models.NlpModelsEnum = nlp_models.NlpModelsEnum.default,
 ) -> List[float]:
-    nlp = nlp_models[nlp_model.value]
+    nlp = nlp_models.nlp_models[nlp_model.value]
     doc = nlp(text)
     vector = doc.vector.tolist()
     return vector
@@ -31,10 +32,10 @@ def get_encode(
 @router.post("/nlp/encode", response_model=List[List[str]])
 def post_encode(
     input: models.PostEncodeInput,
-    nlp_model: NlpModelsEnum = NlpModelsEnum.default,
+    nlp_model: nlp_models.NlpModelsEnum = nlp_models.NlpModelsEnum.default,
 ) -> List[List[str]]:
     text_list = input.text_list
-    nlp = nlp_models[nlp_model.value]
+    nlp = nlp_models.nlp_models[nlp_model.value]
     docs = [nlp(_) for _ in text_list]
     res = [_.vector.tolist() for _ in docs]
     return res
@@ -42,9 +43,11 @@ def post_encode(
 
 @router.get("/nlp/similarity", response_model=float)
 def get_similarity(
-    text1: str, text2: str, nlp_model: NlpModelsEnum = NlpModelsEnum.default
+    text1: str,
+    text2: str,
+    nlp_model: nlp_models.NlpModelsEnum = nlp_models.NlpModelsEnum.default,
 ) -> float:
-    nlp = nlp_models[nlp_model.value]
+    nlp = nlp_models.nlp_models[nlp_model.value]
     doc1 = nlp(text1)
     doc2 = nlp(text2)
     res = doc1.similarity(doc2)
@@ -52,7 +55,10 @@ def get_similarity(
 
 
 @router.get("/nlp/ner")
-def get_ner(text: str, nlp_model: NlpModelsEnum = NlpModelsEnum.default):
+def get_ner(
+    text: str,
+    nlp_model: nlp_models.NlpModelsEnum = nlp_models.NlpModelsEnum.default,
+):
     def _process(ent: spacy.tokens.span.Span):
         res = {
             "text": ent.text,
@@ -62,7 +68,7 @@ def get_ner(text: str, nlp_model: NlpModelsEnum = NlpModelsEnum.default):
         }
         return res
 
-    nlp = nlp_models[nlp_model.value]
+    nlp = nlp_models.nlp_models[nlp_model.value]
     doc = nlp(text)
     res = [_process(_) for _ in doc.ents]
     return res
@@ -70,7 +76,8 @@ def get_ner(text: str, nlp_model: NlpModelsEnum = NlpModelsEnum.default):
 
 @router.get("/nlp/svo")
 def get_svo(
-    text: str, nlp_model: NlpModelsEnum = NlpModelsEnum.default
+    text: str,
+    nlp_model: nlp_models.NlpModelsEnum = nlp_models.NlpModelsEnum.default,
 ) -> List[Dict[str, Any]]:
     def _process(triple: textacy.extract.triples.SVOTriple):
         subj = [_.text for _ in triple.subject]
@@ -83,7 +90,7 @@ def get_svo(
         }
         return res
 
-    nlp = nlp_models[nlp_model.value]
+    nlp = nlp_models.nlp_models[nlp_model.value]
     doc = nlp(text)
     svos = list(extract.subject_verb_object_triples(doc))
     res = [_process(_) for _ in svos]
