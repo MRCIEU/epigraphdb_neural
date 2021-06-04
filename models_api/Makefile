@@ -1,7 +1,7 @@
 .PHONY: clean data lint requirements docs
 
 # directories that contain python scripts in the codebase
-python_dirs = app epigraphdb_common_utils
+python_dirs = app
 
 #################################################################################
 # Rules
