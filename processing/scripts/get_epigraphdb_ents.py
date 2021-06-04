@@ -15,6 +15,7 @@ assert DATA_DIR.exists()
 OUTPUT_DIR = DATA_DIR / "epigraphdb_ents"
 
 CHUNK_SIZE = 5_000
+META_NODE_EXCLUDE = ["LiteratureTriple"]
 
 
 def get_node_info(
@@ -72,6 +73,7 @@ def main():
     r = requests.get(f"{backend_url}/models/meta-nodes/non-code-name")
     r.raise_for_status()
     meta_nodes = r.json()
+    meta_nodes = [_ for _ in meta_nodes if _ not in META_NODE_EXCLUDE]
 
     # get count of meta nodes
     r = requests.get(f"{backend_url}/about/metrics")
