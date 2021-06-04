@@ -1,0 +1,25 @@
+name: epigraphdb_neural_processing
+channels:
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7
+  - black
+  - flake8
+  - autoflake
+  - mypy
+  - isort
+  - jedi
+  - jupyterlab
+  - matplotlib
+  - nodejs
+  - numpy
+  - pandas
+  - seaborn
+  - requests
+  - spacy
+  - environs
+  - pip
+  - pip:
+    - nb_black
