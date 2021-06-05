@@ -29,11 +29,11 @@ def get_encode(
     return vector
 
 
-@router.post("/nlp/encode", response_model=List[List[str]])
+@router.post("/nlp/encode", response_model=List[List[float]])
 def post_encode(
     input: models.PostEncodeInput,
     nlp_model: nlp_models.NlpModelsEnum = nlp_models.NlpModelsEnum.default,
-) -> List[List[str]]:
+) -> List[List[float]]:
     text_list = input.text_list
     nlp = nlp_models.nlp_models[nlp_model.value]
     docs = [nlp(_) for _ in text_list]
