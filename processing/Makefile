@@ -13,6 +13,10 @@ python_dirs = funcs scripts
 get_epigraphdb_ents:
 	python -m scripts.get_epigraphdb_ents
 
+## clean epigraphdb ents
+clean_epigraphdb_ents:
+	python -m scripts.clean_epigraphdb_ents
+
 ## ==== codebase ====
 
 ## Format codebase
