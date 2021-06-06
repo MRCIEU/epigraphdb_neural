@@ -1,0 +1,17 @@
+version: "3.4"
+
+services:
+
+# TODO main_api
+
+  models_api:
+    build:
+      context: ./models_api
+    restart: unless-stopped
+    ports:
+      - ${DOCKER_NEURAL_MODELS_PORT:-8016}:80
+    volumes:
+      - ./models_api:/app
+      - ./models:/models
+    environment:
+      - MAX_WORKERS=1

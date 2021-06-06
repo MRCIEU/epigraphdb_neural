@@ -1,11 +1,23 @@
 .PHONY: clean data lint requirements docs
 
 # directories that contain python scripts in the codebase
-python_dirs = app
+python_dirs = app epigraphdb_common_utils
 
 #################################################################################
 # Rules
 #################################################################################
+
+## ==== running the api ====
+
+## sanity check
+check:
+	python -m scripts.check
+
+## Start API server, port: 80
+run:
+	python -m scripts.check
+	uvicorn app.main:app --reload \
+	--host 0.0.0.0 --port 80
 
 ## ==== codebase ====
 
