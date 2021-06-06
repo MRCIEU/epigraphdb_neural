@@ -7,7 +7,7 @@ python_dirs = funcs scripts
 # Rules
 #################################################################################
 
-## ==== processing ====
+## ==== processing: epigraphdb entities ====
 
 ## get epigraphdb ents
 get_epigraphdb_ents:
@@ -16,6 +16,10 @@ get_epigraphdb_ents:
 ## clean epigraphdb ents
 clean_epigraphdb_ents:
 	python -m scripts.clean_epigraphdb_ents
+
+## encode epigraphdb ents
+encode_epigraphdb_ents:
+	python -m scripts.encode_epigraphdb_ents
 
 ## ==== codebase ====
 
