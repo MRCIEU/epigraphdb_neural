@@ -1,9 +1,11 @@
 import requests
 from colorama import Fore, Style
 
-
-from epigraphdb_common_utils import neural_env_configs, docker_neural_env_configs
 from app.es import es_client_connected
+from epigraphdb_common_utils import (
+    docker_neural_env_configs,
+    neural_env_configs,
+)
 
 
 def check_env_configs() -> None:
@@ -34,7 +36,10 @@ def check_env_configs() -> None:
         + Style.RESET_ALL
     )
     print(
-        Style.DIM + Fore.YELLOW + docker_neural_env_configs.__doc__ + Style.RESET_ALL
+        Style.DIM
+        + Fore.YELLOW
+        + docker_neural_env_configs.__doc__
+        + Style.RESET_ALL
     )
     print(docker_neural_env_configs.env_configs)
 

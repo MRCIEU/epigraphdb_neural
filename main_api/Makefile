@@ -1,11 +1,16 @@
 .PHONY: clean data lint requirements docs
 
 # directories that contain python scripts in the codebase
-python_dirs = app epigraphdb_common_utils
+python_dirs = app epigraphdb_common_utils scripts
 
 #################################################################################
 # Rules
 #################################################################################
+
+## ==== entity embeddings ====
+write_ent_embeddings:
+	python -m scripts.write_ent_embeddings
+
 
 ## ==== running the api ====
 
