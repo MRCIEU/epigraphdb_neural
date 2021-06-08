@@ -7,7 +7,7 @@ from loguru import logger
 from pydash import py_
 from typing_extensions import Literal
 
-from app.settings import es_host, es_port
+from app.settings import common_prefix, es_host, es_port
 from app.utils import chunk_process, timeit
 
 es_client = Elasticsearch(
@@ -25,9 +25,15 @@ def es_client_connected() -> bool:
         return False
 
 
-def make_index_name(meta_node: str) -> str:
-    template = "embeddings-{meta_node}"
-    return template.format(meta_node=meta_node.lower())
+def meta_node_to_index_name(meta_node: str) -> str:
+    template = "{common_prefix}{meta_node}"
+    return template.format(
+        meta_node=meta_node.lower(), common_prefix=common_prefix
+    )
+
+
+def index_name_to_meta_node(index_name: str) -> str:
+    return index_name[len(common_prefix) :].title()
 
 
 def init_index(
@@ -45,7 +51,7 @@ def init_index(
             "dynamic": "true",
             "_source": {"enabled": "true"},
             "properties": {
-                "id": {"type": "text"},
+                "id": {"type": "keyword"},
                 "name": {"type": "text"},
                 "text": {"type": "text"},
                 "vector": {"type": "dense_vector", "dims": dim_size},

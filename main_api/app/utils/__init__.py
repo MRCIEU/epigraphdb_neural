@@ -1,6 +1,7 @@
 import time
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
 
+import numpy as np
 from loguru import logger
 
 
@@ -25,3 +26,9 @@ def timeit(method: Callable):
         return result
 
     return timed
+
+
+def vector_empty(vector: List[float]) -> bool:
+    arr = np.array(vector)
+    empty = np.count_nonzero(arr) == 0
+    return empty

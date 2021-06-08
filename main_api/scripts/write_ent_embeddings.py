@@ -55,7 +55,7 @@ def main():
     for meta_node in meta_nodes:
         logger.info(f"Process for {meta_node}")
         df = load_node_data(meta_node, DB_PATH)
-        index_name = es.make_index_name(meta_node)
+        index_name = es.meta_node_to_index_name(meta_node)
         es.index_data(
             df=df,
             index_name=index_name,
