@@ -33,15 +33,13 @@ def get_meta_nodes(db_path: Path) -> List[str]:
 @timeit
 def load_node_data(meta_node: str, db_path: Path) -> pd.DataFrame:
     with sqlite3.connect(db_path) as conn:
-        query = f"SELECT id, name, vector FROM {meta_node}"
+        query = f"SELECT id, name, clean_text, vector FROM {meta_node}"
         df = pd.read_sql(query, conn)
     print(df.info)
     df = df.assign(
         # convect str vector back to List[float]
         vector=lambda df: df["vector"].apply(lambda x: json.loads(x)),
-        # text, at the moment text inherits from name completely
-        # which might change at future date
-        text=lambda df: df["name"],
+        text=lambda df: df["clean_text"],
     )
     return df
 

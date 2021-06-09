@@ -1,9 +1,12 @@
 import re
+from functools import partial
 
 import pandas as pd
+import spacy
 from loguru import logger
 
-from funcs.utils import find_project_root
+from funcs.utils import find_project_root, timeit
+from resources.nlp_models import load_scispacy_lg
 
 GWAS_SOURCE_EXCLUDE = [
     "eqtl-a-",  # ENSGXXXXX
@@ -73,11 +76,45 @@ def process_gwas(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def clean_text(text: str, nlp_model: spacy.language.Language) -> str:
+    # turn text into its lemmatised form
+    # which is treated as the clean text
+    try:
+        doc = nlp_model(text)
+        clean_text = " ".join([token.lemma_ for token in doc])
+    except:
+        logger.error(text)
+        raise
+    return clean_text
+
+
+def general_preprocess(df: pd.DataFrame) -> pd.DataFrame:
+    # general purpose preprocessing
+    # could never anticipate how dirty the source is could we
+    df = df.dropna().drop_duplicates()
+    return df
+
+
+@timeit
+def general_cleaning(
+    df: pd.DataFrame, nlp_model: spacy.language.Language
+) -> pd.DataFrame:
+    df = df.assign(
+        clean_text=lambda df: df["name"].apply(
+            partial(clean_text, nlp_model=nlp_model)
+        )
+    )
+    print(df.info())
+    print(df.head(5))
+    return df
+
+
 def main():
     meta_nodes = [str(_.stem) for _ in OUTPUT_DIR.iterdir() if _.is_dir()]
     logger.info(f"meta nodes: {meta_nodes}")
 
     process_funcs = {"Gwas": process_gwas}
+    scispacy_lg = load_scispacy_lg()
 
     for meta_node in meta_nodes:
         logger.info(f"Process {meta_node}")
@@ -86,8 +123,12 @@ def main():
         output_file = OUTPUT_DIR / meta_node / "clean.csv"
         if not output_file.exists():
             df = pd.read_csv(input_file)
+            df = general_preprocess(df)
+            # meta ent specific processing
             if meta_node in process_funcs.keys():
                 df = process_funcs[meta_node](df)
+            # general processing
+            df = general_cleaning(df, nlp_model=scispacy_lg)
             df.to_csv(output_file, index=False)
 
 

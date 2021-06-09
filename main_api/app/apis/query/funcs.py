@@ -36,7 +36,7 @@ def query_vector(
         body={
             "size": limit,
             "query": script_query,
-            "_source": {"includes": ["id", "name"]},
+            "_source": {"includes": ["id", "name", "text"]},
         },
     )
     res = [_ for _ in response["hits"]["hits"]]
@@ -48,6 +48,7 @@ def format_query_results(query_results) -> List[models.EntityQueryItem]:
         {
             "id": _["_source"]["id"],
             "name": _["_source"]["name"],
+            "text": _["_source"]["text"],
             "score": _["_score"] - 1,
             "meta_node": index_name_to_meta_node(_["_index"]),
         }
