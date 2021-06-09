@@ -4,7 +4,7 @@ services:
 
   neural:
     build:
-      context: ./epigraphdb_neural/main_api
+      context: ./main_api
     restart: unless-stopped
     ports:
       - ${DOCKER_NEURAL_PORT:-8015}:80
