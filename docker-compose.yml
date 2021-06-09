@@ -26,5 +26,6 @@ services:
     volumes:
       - ./models_api:/app
       - ./models:/models
+      - ./data:/data
     environment:
       - MAX_WORKERS=1
