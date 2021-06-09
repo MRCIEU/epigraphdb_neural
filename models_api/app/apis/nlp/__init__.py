@@ -6,6 +6,7 @@ from fastapi import APIRouter
 from textacy import extract
 
 from app import nlp_models
+from app.funcs import text_processing
 
 from . import models
 
@@ -18,26 +19,45 @@ def get_model_info():
     return model_info
 
 
-@router.get("/nlp/encode", response_model=List[float])
+@router.get("/nlp/encode", response_model=models.GetEncodeResponse)
 def get_encode(
     text: str,
+    asis: bool = False,
     nlp_model: nlp_models.NlpModelsEnum = nlp_models.NlpModelsEnum.default,
-) -> List[float]:
+) -> models.GetEncodeDict:
     nlp = nlp_models.nlp_models[nlp_model.value]
-    doc = nlp(text)
+    if asis:
+        clean_text = text
+    else:
+        clean_text = text_processing.preprocess_encode(
+            text=text, nlp_model=nlp
+        )
+    doc = nlp(clean_text)
     vector = doc.vector.tolist()
-    return vector
+    res: models.GetEncodeDict = {"clean_text": clean_text, "results": vector}
+    return res
 
 
-@router.post("/nlp/encode", response_model=List[List[float]])
+@router.post("/nlp/encode", response_model=models.PostEncodeResponse)
 def post_encode(
     input: models.PostEncodeInput,
     nlp_model: nlp_models.NlpModelsEnum = nlp_models.NlpModelsEnum.default,
-) -> List[List[float]]:
+) -> models.PostEncodeDict:
     text_list = input.text_list
     nlp = nlp_models.nlp_models[nlp_model.value]
-    docs = [nlp(_) for _ in text_list]
-    res = [_.vector.tolist() for _ in docs]
+    if input.asis:
+        clean_text_list = text_list
+    else:
+        clean_text_list = [
+            text_processing.preprocess_encode(text=_, nlp_model=nlp)
+            for _ in text_list
+        ]
+    docs = [nlp(_) for _ in clean_text_list]
+    vector_list = [_.vector.tolist() for _ in docs]
+    res: models.PostEncodeDict = {
+        "clean_text": clean_text_list,
+        "results": vector_list,
+    }
     return res
 
 

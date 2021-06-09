@@ -1,10 +1,9 @@
 from typing import Dict, List
 
-import requests
 from fastapi import APIRouter, HTTPException, Query
 
+from app.apis.nlp import get_nlp_encode_text
 from app.es import es_client, index_name_to_meta_node, meta_node_to_index_name
-from app.settings import MODELS_ENCODE_URL
 from app.utils import vector_empty
 
 from . import funcs, models
@@ -17,26 +16,38 @@ except:
     embedding_indices = []
 
 
-@router.get("/query/text", response_model=List[Dict])
+@router.get("/query/text", response_model=models.GetQueryTextResponse)
 def get_query_text(
     text: str,
+    asis: bool = False,
     include_meta_nodes: List[str] = Query([]),
     limit: int = Query(50, ge=1, le=200),
-) -> List[models.EntityQueryItem]:
-    """Return ents that matches the input text via text embeddings."""
+) -> models.GetQueryTextDict:
+    """Return ents that matches the input text via text embeddings.
 
-    r = requests.get(MODELS_ENCODE_URL, params={"text": text})
-    r.raise_for_status()
-    query_vector = r.json()
+    - `asis`: If False, apply builtin preprocessing to `text`
+    - `include_meta_nodes`: Leave as is to search in all meta entities,
+      otherwise limit to the supplied list
+    """
+
+    encode_res = get_nlp_encode_text(text=text, asis=asis)
+    query_vector = encode_res["results"]
+    clean_text = encode_res["clean_text"]
     if vector_empty(query_vector):
-        return []
-
-    indices = get_indices_from_meta_nodes(include_meta_nodes)
-
-    search_res = funcs.query_vector(
-        query_vector, client=es_client, indices=indices, limit=limit
-    )
-    res: List[models.EntityQueryItem] = funcs.format_query_results(search_res)
+        res: models.GetQueryTextDict = {
+            "clean_text": clean_text,
+            "results": [],
+        }
+    else:
+        indices = get_indices_from_meta_nodes(include_meta_nodes)
+        search_res = funcs.query_vector(
+            query_vector, client=es_client, indices=indices, limit=limit
+        )
+        results = funcs.format_query_results(search_res)
+        res = {
+            "clean_text": clean_text,
+            "results": results,
+        }
     return res
 
 

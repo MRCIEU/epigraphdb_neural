@@ -25,9 +25,9 @@ assert ENTS_DIR.exists()
 
 def encode(item_list: List[Dict], encode_url: str) -> List[Dict]:
     text_list = [_["clean_text"] for _ in item_list]
-    r = requests.post(encode_url, json={"text_list": text_list})
+    r = requests.post(encode_url, json={"text_list": text_list, "asis": True})
     r.raise_for_status()
-    encodings = r.json()
+    encodings = r.json()["results"]
     res = [
         {"id": _["id"], "name": _["name"], "clean_text": _["clean_text"], "vector": encodings[idx]}
         for idx, _ in enumerate(item_list)
