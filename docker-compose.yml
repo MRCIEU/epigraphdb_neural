@@ -2,7 +2,20 @@ version: "3.4"
 
 services:
 
-# TODO main_api
+  neural:
+    build:
+      context: ./epigraphdb_neural/main_api
+    restart: unless-stopped
+    ports:
+      - ${DOCKER_NEURAL_PORT:-8015}:80
+    command: bash -c "make run"
+    env_file:
+      - .env
+    volumes:
+      - ./main_api:/app
+      - ./data:/data
+    environment:
+      - MAX_WORKERS=1
 
   models_api:
     build:
