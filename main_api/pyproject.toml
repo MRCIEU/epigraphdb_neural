@@ -20,6 +20,7 @@ elasticsearch-dsl = "^7.1.0"
 pandas = "^1.1"
 icecream = "^2.1.0"
 pydash = "^5.0.0"
+PyYAML = "^5.4.1"
 
 [tool.poetry.dev-dependencies]
 ipython = "^7.24.1"
@@ -28,6 +29,7 @@ isort = "^5.8.0"
 autoflake = "^1.4"
 flake8 = "^3.9.2"
 black = "^21.5b2"
+pytest = "^6.2.4"
 
 [tool.black]
 line-length = 79

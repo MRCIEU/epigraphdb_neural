@@ -11,12 +11,12 @@ class PostEncodeInput(BaseModel):
     text_list: List[str]
     asis: bool = False
 
-    @validator("text_list", whole=True)
+    @validator("text_list", each_item=False)
     def text_list_length(cls, v):
         limit = NUM_ENCODE_LIMIT
         if len(v) > limit:
             raise HTTPException(
-                status_code=400, detail=f"Too many items. Limit: {limit}."
+                status_code=422, detail=f"Too many items. Limit: {limit}."
             )
         return v
 

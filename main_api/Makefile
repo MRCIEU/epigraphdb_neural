@@ -1,7 +1,7 @@
 .PHONY: clean data lint requirements docs
 
 # directories that contain python scripts in the codebase
-python_dirs = app epigraphdb_common_utils scripts
+python_dirs = app epigraphdb_common_utils scripts tests
 
 #################################################################################
 # Rules
@@ -42,6 +42,10 @@ lint:
 		$(python_dirs)
 	python -m mypy \
 		$(python_dirs)
+
+## Unit tests
+test:
+	python -m pytest -vv
 
 #################################################################################
 # Self Documenting Commands                                                     #
