@@ -5,6 +5,7 @@ import pandas as pd
 import spacy
 from loguru import logger
 
+from funcs import models_api_text_processing
 from funcs.utils import find_project_root, timeit
 from resources.nlp_models import load_scispacy_lg
 
@@ -20,9 +21,12 @@ GWAS_PATTERN_EXCLUDE = [
 
 PROJ_ROOT = find_project_root()
 DATA_DIR = PROJ_ROOT.parent / "data"
-OUTPUT_DIR = DATA_DIR / "epigraphdb_ents"
+EPIGRAPHDB_DIR = DATA_DIR / "epigraphdb_ents"
+SOURCE_DIR = EPIGRAPHDB_DIR / "source"
 assert DATA_DIR.exists()
-assert OUTPUT_DIR.exists()
+assert EPIGRAPHDB_DIR.exists()
+assert SOURCE_DIR.exists()
+OUTPUT_DIR = EPIGRAPHDB_DIR / "clean"
 
 
 def process_gwas(df: pd.DataFrame) -> pd.DataFrame:
@@ -80,8 +84,8 @@ def clean_text(text: str, nlp_model: spacy.language.Language) -> str:
     # turn text into its lemmatised form
     # which is treated as the clean text
     try:
-        doc = nlp_model(text)
-        clean_text = " ".join([token.lemma_ for token in doc])
+        clean_func = models_api_text_processing.preprocess_encode
+        clean_text = clean_func(text=text, nlp_model=nlp_model)
     except:
         logger.error(text)
         raise
@@ -110,7 +114,7 @@ def general_cleaning(
 
 
 def main():
-    meta_nodes = [str(_.stem) for _ in OUTPUT_DIR.iterdir() if _.is_dir()]
+    meta_nodes = [str(_.stem) for _ in SOURCE_DIR.iterdir() if _.is_dir()]
     logger.info(f"meta nodes: {meta_nodes}")
 
     process_funcs = {"Gwas": process_gwas}
@@ -118,9 +122,10 @@ def main():
 
     for meta_node in meta_nodes:
         logger.info(f"Process {meta_node}")
-        input_file = OUTPUT_DIR / meta_node / "ents.csv"
+        input_file = SOURCE_DIR / meta_node / "ents.csv"
         assert input_file.exists()
         output_file = OUTPUT_DIR / meta_node / "clean.csv"
+        output_file.parent.mkdir(parents=True, exist_ok=True)
         if not output_file.exists():
             df = pd.read_csv(input_file)
             df = general_preprocess(df)

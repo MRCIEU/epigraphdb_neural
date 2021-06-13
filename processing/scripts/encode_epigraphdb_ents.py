@@ -18,9 +18,11 @@ CHUNK_SIZE = 200  # service limit
 
 PROJ_ROOT = find_project_root()
 DATA_DIR = PROJ_ROOT.parent / "data"
-ENTS_DIR = DATA_DIR / "epigraphdb_ents"
-OUTPUT_FILE = ENTS_DIR / "epigraphdb_ents.db"
-assert ENTS_DIR.exists()
+EPIGRAPHDB_DIR = DATA_DIR / "epigraphdb_ents"
+CLEAN_DIR = EPIGRAPHDB_DIR / "clean"
+assert EPIGRAPHDB_DIR.exists()
+assert CLEAN_DIR.exists()
+OUTPUT_FILE = EPIGRAPHDB_DIR / "epigraphdb_ents.db"
 
 
 def encode(item_list: List[Dict], encode_url: str) -> List[Dict]:
@@ -29,7 +31,12 @@ def encode(item_list: List[Dict], encode_url: str) -> List[Dict]:
     r.raise_for_status()
     encodings = r.json()["results"]
     res = [
-        {"id": _["id"], "name": _["name"], "clean_text": _["clean_text"], "vector": encodings[idx]}
+        {
+            "id": _["id"],
+            "name": _["name"],
+            "clean_text": _["clean_text"],
+            "vector": encodings[idx],
+        }
         for idx, _ in enumerate(item_list)
     ]
     return res
@@ -39,9 +46,10 @@ def encode(item_list: List[Dict], encode_url: str) -> List[Dict]:
 def encode_entity(meta_node: str, ents_dir: Path, encode_url: str) -> None:
     logger.info(f"encode ents for meta_node {meta_node}")
 
-    clean_df_path = ents_dir / meta_node / "clean.csv"
-    empty_df_path = ents_dir / meta_node / "empty.csv"
-    results_df_path = ents_dir / meta_node / "encodes.csv.gz"
+    clean_df_path = ents_dir / "clean" / meta_node / "clean.csv"
+    empty_df_path = ents_dir / "encodes" / meta_node / "empty.csv"
+    results_df_path = ents_dir / "encodes" / meta_node / "encodes.csv.gz"
+    results_df_path.parent.mkdir(exist_ok=True, parents=True)
     if results_df_path.exists():
         logger.info(f"{results_df_path} exists, skipped")
         return
@@ -71,7 +79,9 @@ def encode_entity(meta_node: str, ents_dir: Path, encode_url: str) -> None:
         )
     )
 
-    results_df = encodes_df[~encodes_df["empty"]][["id", "name", "clean_text", "vector"]]
+    results_df = encodes_df[~encodes_df["empty"]][
+        ["id", "name", "clean_text", "vector"]
+    ]
     empty_df = encodes_df[encodes_df["empty"]][["id", "name", "clean_text"]]
 
     results_df.to_csv(results_df_path, index=False, compression="gzip")
@@ -82,7 +92,7 @@ def encode_entity(meta_node: str, ents_dir: Path, encode_url: str) -> None:
 @timeit
 def write_results(meta_node: str, ents_dir: Path, output_file: Path) -> bool:
     logger.info(f"Processing results for meta_node {meta_node}")
-    results_df_path = ents_dir / meta_node / "encodes.csv.gz"
+    results_df_path = ents_dir / "encodes" / meta_node / "encodes.csv.gz"
     df = pd.read_csv(results_df_path)
     print(df.info())
 
@@ -99,13 +109,15 @@ def main():
     encode_url = ENCODE_URL.format(neural_models_api_url=neural_models_api_url)
     ic(encode_url)
 
-    meta_nodes = [str(_.stem) for _ in ENTS_DIR.iterdir() if _.is_dir()]
+    meta_nodes = [str(_.stem) for _ in CLEAN_DIR.iterdir() if _.is_dir()]
     ic(meta_nodes)
 
     # stage 1: encode by meta node
     for meta_node in meta_nodes:
         encode_entity(
-            meta_node=meta_node, ents_dir=ENTS_DIR, encode_url=encode_url,
+            meta_node=meta_node,
+            ents_dir=EPIGRAPHDB_DIR,
+            encode_url=encode_url,
         )
 
     # stage 2: collect into one df
@@ -114,7 +126,9 @@ def main():
         return
     for meta_node in meta_nodes:
         write_results(
-            meta_node=meta_node, ents_dir=ENTS_DIR, output_file=OUTPUT_FILE,
+            meta_node=meta_node,
+            ents_dir=EPIGRAPHDB_DIR,
+            output_file=OUTPUT_FILE,
         )
 
 

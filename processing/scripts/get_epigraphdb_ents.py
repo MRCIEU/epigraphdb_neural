@@ -12,7 +12,9 @@ from funcs.utils import find_project_root
 PROJ_ROOT = find_project_root()
 DATA_DIR = PROJ_ROOT.parent / "data"
 assert DATA_DIR.exists()
-OUTPUT_DIR = DATA_DIR / "epigraphdb_ents"
+EPIGRAPHDB_DIR = DATA_DIR / "epigraphdb_ents"
+assert EPIGRAPHDB_DIR.exists()
+OUTPUT_DIR = DATA_DIR / "epigraphdb_ents" / "source"
 
 CHUNK_SIZE = 5_000
 META_NODE_EXCLUDE = ["LiteratureTriple"]
