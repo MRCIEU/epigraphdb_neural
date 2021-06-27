@@ -10,11 +10,6 @@ from . import funcs, models
 
 router = APIRouter()
 
-try:
-    embedding_indices = funcs.get_embedding_indices(client=es_client)
-except:
-    embedding_indices = []
-
 
 @router.get("/query/text", response_model=models.GetQueryTextResponse)
 def get_query_text(
@@ -78,6 +73,7 @@ def get_query_ent_encode(
     "Return the text embeddings of the query entity."
 
     index = meta_node_to_index_name(meta_node)
+    embedding_indices = funcs.get_embedding_indices(client=es_client)
     if index not in embedding_indices:
         raise HTTPException(
             status_code=422,
@@ -101,11 +97,13 @@ def get_query_ent_encode(
 @router.get("/query/meta-entity-list", response_model=List[str])
 def get_query_meta_entity_list() -> List[str]:
     """Get currently available meta nodes."""
+    embedding_indices = funcs.get_embedding_indices(client=es_client)
     res = [index_name_to_meta_node(_) for _ in embedding_indices]
     return res
 
 
 def get_indices_from_meta_nodes(meta_nodes: List[str]) -> List[str]:
+    embedding_indices = funcs.get_embedding_indices(client=es_client)
     if len(meta_nodes) > 0:
         indices = [meta_node_to_index_name(_) for _ in meta_nodes]
         indices = list(set(embedding_indices).intersection(set(indices)))
