@@ -39,7 +39,9 @@ def index_name_to_meta_node(index_name: str) -> str:
 def init_index(
     index_name: str, dim_size: int, client: Elasticsearch
 ) -> Literal[True]:
-    client.indices.delete(index=index_name, ignore=[404])
+    es_indices = list(client.indices.get_alias("*").keys())  # type: ignore
+    if index_name in es_indices:
+        client.indices.delete(index=index_name, ignore=[404])
     request_body = {
         "settings": {
             "number_of_shards": 1,

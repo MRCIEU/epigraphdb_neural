@@ -4,11 +4,13 @@ from pathlib import Path
 from typing import List
 
 import pandas as pd
+from elasticsearch import Elasticsearch
 from icecream import ic
 from loguru import logger
 from pydash import py_
 
 from app import es
+from app.settings import common_prefix
 from app.utils import timeit
 
 DATA_DIR = Path("/data")
@@ -30,6 +32,13 @@ def get_meta_nodes(db_path: Path) -> List[str]:
     return meta_nodes
 
 
+def purge_existing_indices(client: Elasticsearch):
+    es_indices = list(client.indices.get_alias("*").keys())  # type: ignore
+    embedding_indices = [_ for _ in es_indices if _.startswith(common_prefix)]
+    for index in embedding_indices:
+        client.indices.delete(index=index, ignore=[404])
+
+
 @timeit
 def load_node_data(meta_node: str, db_path: Path) -> pd.DataFrame:
     with sqlite3.connect(db_path) as conn:
@@ -49,6 +58,7 @@ def main():
         logger.info(f"expected file {DB_PATH}. exit now.")
 
     meta_nodes = get_meta_nodes(DB_PATH)
+    purge_existing_indices(client=es.es_client)
 
     for meta_node in meta_nodes:
         logger.info(f"Process for {meta_node}")
