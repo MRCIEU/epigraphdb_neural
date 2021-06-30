@@ -21,6 +21,8 @@ services:
     build:
       context: ./models_api
     restart: unless-stopped
+    env_file:
+      - .env
     ports:
       - ${DOCKER_NEURAL_MODELS_PORT:-8016}:80
     volumes:
@@ -29,3 +31,17 @@ services:
       - ./data:/data
     environment:
       - MAX_WORKERS=1
+
+  transformers:
+    build:
+      context: ./transformers
+      dockerfile: Dockerfile
+    entrypoint: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+    env_file:
+      - .env
+    restart: unless-stopped
+    ports:
+      - ${DOCKER_TRANSFORMERS_PORT:-8017}:8000
+    volumes:
+      - ./transformers:/app
+      - ./models:/models

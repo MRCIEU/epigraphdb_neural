@@ -1,0 +1,5 @@
+transformers==3.3
+loguru
+pydantic
+fastapi
+environs
