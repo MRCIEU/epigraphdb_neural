@@ -54,9 +54,13 @@ def get_query_ent(
     limit: int = Query(50, ge=1, le=200),
 ) -> List[models.EntityQueryItem]:
     "Return ents that matches the query entity via text embeddings."
-    query_vector = get_query_ent_encode(
-        entity_id=entity_id, meta_node=meta_node
-    )
+    try:
+        query_vector = get_query_ent_encode(
+            entity_id=entity_id, meta_node=meta_node
+        )
+    except:
+        # When the query term is not encoded
+        return []
     indices = get_indices_from_meta_nodes(include_meta_nodes)
     search_res = funcs.query_vector(
         query_vector, client=es_client, indices=indices, limit=limit
