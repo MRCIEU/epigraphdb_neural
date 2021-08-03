@@ -74,7 +74,7 @@ def get_similarity(
     return res
 
 
-@router.get("/nlp/ner")
+@router.get("/nlp/ner", response_model=List[models.GetNerItem])
 def get_ner(
     text: str,
     nlp_model: nlp_models.NlpModelsEnum = nlp_models.NlpModelsEnum.default,
@@ -85,6 +85,8 @@ def get_ner(
             "label": ent.label_,
             "start": ent.start,
             "end": ent.end,
+            "start_char": ent.start_char,
+            "end_char": ent.end_char,
         }
         return res
 

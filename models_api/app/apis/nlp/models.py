@@ -41,3 +41,12 @@ class GetEncodeResponse(BaseModel):
 class PostEncodeResponse(BaseModel):
     clean_text: List[str]
     results: List[List[float]]
+
+
+class GetNerItem(BaseModel):
+    text: str
+    label: str
+    start: int
+    end: int
+    start_char: int
+    end_char: int
