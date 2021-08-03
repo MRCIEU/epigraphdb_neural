@@ -4,7 +4,7 @@ from typing import List
 import environs
 import ray
 import torch
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel
 from ray import serve
 from transformers import (
@@ -17,6 +17,7 @@ from transformers import (
 class InferenceRequest(BaseModel):
     text_1: List[str]
     text_2: List[str]
+
 
 MAX_NUM_TEXT_PAIRS = 20
 BASE_MODEL_NAME = "bionlp/bluebert_pubmed_mimic_uncased_L-12_H-768_A-12"
