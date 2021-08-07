@@ -33,4 +33,4 @@ def test_responses(url, method, params):
         r = client.get(url, params=params)
     elif method == "POST":
         r = client.post(url, json=params)
-    assert r.raise_for_status() is None
+    assert r.ok
