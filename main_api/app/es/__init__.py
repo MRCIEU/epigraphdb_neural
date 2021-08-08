@@ -7,7 +7,12 @@ from loguru import logger
 from pydash import py_
 from typing_extensions import Literal
 
-from app.settings import common_prefix, es_host, es_port
+from app.settings import (
+    embeddings_common_prefix,
+    es_host,
+    es_port,
+    text_common_prefix,
+)
 from app.utils import chunk_process, timeit
 
 es_client = Elasticsearch(
@@ -25,15 +30,24 @@ def es_client_connected() -> bool:
         return False
 
 
-def meta_node_to_index_name(meta_node: str) -> str:
+def meta_node_to_index_name(meta_node: str, type: str = "embeddings") -> str:
     template = "{common_prefix}{meta_node}"
+    if type == "embeddings":
+        common_prefix = embeddings_common_prefix
+    else:
+        common_prefix = text_common_prefix
     return template.format(
         meta_node=meta_node.lower(), common_prefix=common_prefix
     )
 
 
-def index_name_to_meta_node(index_name: str) -> str:
-    return index_name[len(common_prefix) :].title()
+def index_name_to_meta_node(index_name: str, type: str = "embeddings") -> str:
+    if type == "embeddings":
+        prefix = embeddings_common_prefix
+    else:
+        prefix = text_common_prefix
+    res = index_name[len(prefix) :].title()
+    return res
 
 
 def init_index(

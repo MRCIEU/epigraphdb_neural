@@ -10,7 +10,7 @@ from loguru import logger
 from pydash import py_
 
 from app import es
-from app.settings import common_prefix
+from app.settings import embeddings_common_prefix
 from app.utils import timeit
 
 DATA_DIR = Path("/data")
@@ -34,7 +34,9 @@ def get_meta_nodes(db_path: Path) -> List[str]:
 
 def purge_existing_indices(client: Elasticsearch):
     es_indices = list(client.indices.get_alias("*").keys())  # type: ignore
-    embedding_indices = [_ for _ in es_indices if _.startswith(common_prefix)]
+    embedding_indices = [
+        _ for _ in es_indices if _.startswith(embeddings_common_prefix)
+    ]
     for index in embedding_indices:
         client.indices.delete(index=index, ignore=[404])
 

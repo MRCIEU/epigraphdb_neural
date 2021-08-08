@@ -10,4 +10,7 @@ models_api_url = env_configs["models_api_url"]
 # params
 NUM_ENCODE_LIMIT = 200
 MODELS_ENCODE_URL = f"{models_api_url}/nlp/encode"
-common_prefix = "embeddings-"
+embeddings_common_prefix = "embeddings-"
+# NOTE: this logic currently sits in epigraphdb backend
+# TODO: implement this logic at neural instead
+text_common_prefix = "search-global-"

@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 from elasticsearch import Elasticsearch
 
 from app.es import index_name_to_meta_node
-from app.settings import common_prefix
+from app.settings import embeddings_common_prefix
 
 from . import models
 
@@ -61,7 +61,7 @@ def get_embedding_indices(
     client: Elasticsearch,
 ) -> List[str]:
     mappings = client.indices.get_mapping()
-    embedding_indices = [
-        _ for _ in mappings.keys() if _.startswith(common_prefix)
+    indices = [
+        _ for _ in mappings.keys() if _.startswith(embeddings_common_prefix)
     ]
-    return embedding_indices
+    return indices
