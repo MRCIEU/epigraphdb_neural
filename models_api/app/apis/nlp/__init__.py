@@ -66,10 +66,21 @@ def get_similarity(
     text1: str,
     text2: str,
     nlp_model: nlp_models.NlpModelsEnum = nlp_models.NlpModelsEnum.default,
+    asis: bool = True,
 ) -> float:
     nlp = nlp_models.nlp_models[nlp_model.value]
-    doc1 = nlp(text1)
-    doc2 = nlp(text2)
+    if asis:
+        text1_input = text1
+        text2_input = text2
+    else:
+        text1_input = text_processing.preprocess_encode(
+            text=text1, nlp_model=nlp
+        )
+        text2_input = text_processing.preprocess_encode(
+            text=text2, nlp_model=nlp
+        )
+    doc1 = nlp(text1_input)
+    doc2 = nlp(text2_input)
     res = doc1.similarity(doc2)
     return res
 
