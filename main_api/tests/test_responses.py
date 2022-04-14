@@ -20,6 +20,11 @@ params = [
             ]
         },
     ),
+    (
+        "/nlp/similarity/text",
+        "POST",
+        {"text_list": ["Body mass index", "Body weight", "Obesity"]},
+    ),
     ("/query/text", "GET", {"text": "Body mass index"}),
     ("/query/entity", "GET", {"entity_id": "ieu-a-2", "meta_node": "Gwas"}),
     ("/query/meta-entity-list", "GET", None),

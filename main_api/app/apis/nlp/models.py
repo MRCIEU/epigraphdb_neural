@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from pydantic import BaseModel, create_model_from_typeddict, validator
 from typing_extensions import TypedDict
 
-from app.settings import NUM_ENCODE_LIMIT
+from app.settings import NUM_ENCODE_LIMIT, NUM_SIM_LIMIT
 
 
 class PostEncodeInput(BaseModel):
@@ -19,6 +19,28 @@ class PostEncodeInput(BaseModel):
                 status_code=422, detail=f"Too many items. Limit: {limit}."
             )
         return v
+
+
+class SimilarityTextInput(BaseModel):
+    text_list: List[str]
+
+    @validator("text_list", each_item=False)
+    def text_list_length(cls, v):
+        limit = NUM_SIM_LIMIT
+        if len(v) > limit:
+            raise HTTPException(
+                status_code=422, detail=f"Too many items. Limit: {limit}."
+            )
+        return v
+
+
+class SimilarityTextResponseItem(BaseModel):
+    text_a: str
+    text_b: str
+    similarity_score: float
+
+
+SimilarityTextResponse = List[SimilarityTextResponseItem]
 
 
 class GetNlpEncodeTextDict(TypedDict):

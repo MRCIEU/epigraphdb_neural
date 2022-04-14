@@ -9,6 +9,7 @@ models_api_url = env_configs["models_api_url"]
 
 # params
 NUM_ENCODE_LIMIT = 200
+NUM_SIM_LIMIT = 9
 MODELS_ENCODE_URL = f"{models_api_url}/nlp/encode"
 embeddings_common_prefix = "embeddings-"
 # NOTE: this logic currently sits in epigraphdb backend
