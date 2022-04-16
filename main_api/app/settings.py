@@ -11,6 +11,7 @@ transformers_api_url = env_configs["transformers_api_url"]
 # params
 NUM_ENCODE_LIMIT = 200
 NUM_SIM_LIMIT = 9
+NUM_ONTOLOGY_DISTANCE_LIMIT = 10
 MODELS_ENCODE_URL = f"{models_api_url}/nlp/encode"
 TRANSFORMERS_INFERENCE_URL = f"{transformers_api_url}/inference"
 embeddings_common_prefix = "embeddings-"

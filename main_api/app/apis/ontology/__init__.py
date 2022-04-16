@@ -4,7 +4,7 @@ import requests
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, validator
 
-from app.settings import NUM_SIM_LIMIT, TRANSFORMERS_INFERENCE_URL
+from app.settings import NUM_ONTOLOGY_DISTANCE_LIMIT, TRANSFORMERS_INFERENCE_URL
 
 router = APIRouter()
 
@@ -15,7 +15,7 @@ class OntologyDistanceInput(BaseModel):
 
     @validator("text_1", each_item=False)
     def text_1_length(cls, v):
-        limit = NUM_SIM_LIMIT
+        limit = NUM_ONTOLOGY_DISTANCE_LIMIT
         if len(v) > limit:
             raise HTTPException(
                 status_code=422, detail=f"Too many items. Limit: {limit}."
@@ -24,7 +24,7 @@ class OntologyDistanceInput(BaseModel):
 
     @validator("text_2", each_item=False)
     def text_2_length(cls, v):
-        limit = NUM_SIM_LIMIT
+        limit = NUM_ONTOLOGY_DISTANCE_LIMIT
         if len(v) > limit:
             raise HTTPException(
                 status_code=422, detail=f"Too many items. Limit: {limit}."
