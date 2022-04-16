@@ -28,6 +28,14 @@ params = [
     ("/query/text", "GET", {"text": "Body mass index"}),
     ("/query/entity", "GET", {"entity_id": "ieu-a-2", "meta_node": "Gwas"}),
     ("/query/meta-entity-list", "GET", None),
+    (
+        "/ontology/distance",
+        "POST",
+        {
+            "text_1": ["body mass index", "obesity"],
+            "text_2": ["obesity", "body mass index"],
+        },
+    ),
 ]
 
 

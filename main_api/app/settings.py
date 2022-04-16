@@ -6,11 +6,13 @@ es_port = env_configs["es_port"]
 
 # models api
 models_api_url = env_configs["models_api_url"]
+transformers_api_url = env_configs["transformers_api_url"]
 
 # params
 NUM_ENCODE_LIMIT = 200
 NUM_SIM_LIMIT = 9
 MODELS_ENCODE_URL = f"{models_api_url}/nlp/encode"
+TRANSFORMERS_INFERENCE_URL = f"{transformers_api_url}/inference"
 embeddings_common_prefix = "embeddings-"
 # NOTE: this logic currently sits in epigraphdb backend
 # TODO: implement this logic at neural instead
