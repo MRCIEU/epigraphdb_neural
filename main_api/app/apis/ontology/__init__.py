@@ -4,7 +4,10 @@ import requests
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, validator
 
-from app.settings import NUM_ONTOLOGY_DISTANCE_LIMIT, TRANSFORMERS_INFERENCE_URL
+from app.settings import (
+    NUM_ONTOLOGY_DISTANCE_LIMIT,
+    TRANSFORMERS_INFERENCE_URL,
+)
 
 router = APIRouter()
 
