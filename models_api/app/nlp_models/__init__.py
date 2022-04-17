@@ -1,10 +1,10 @@
 import time
 from enum import Enum
-from typing import Dict, Optional, Union, Any
+from typing import Dict, Optional, Union
 
+import sent2vec
 import spacy
 from loguru import logger
-import sent2vec
 from typing_extensions import TypedDict
 
 from . import config
@@ -24,6 +24,7 @@ class ModelInfo(TypedDict):
     meta: Dict[str, str]
     models: Dict[str, ModelInfoItem]
 
+
 NlpModel = Union[spacy.language.Language, sent2vec.Sent2vecModel]
 
 # ==== loading models ====
@@ -31,8 +32,8 @@ NlpModel = Union[spacy.language.Language, sent2vec.Sent2vecModel]
 logger.info("Loading models")
 start_time = time.time()
 scispacy_lg: spacy.language.Language = spacy.load(config.SCISPACY_LG)
-sent2vec_model = sent2vec.Sent2vecModel()
-sent2vec_model.load_model(str(config.BIOSENVEC_PATH))
+biosentvec = sent2vec.Sent2vecModel()
+biosentvec.load_model(str(config.BIOSENVEC_PATH))
 finish_time = time.time()
 elapsed_time = round(finish_time - start_time, 2)
 logger.info(f"Loading models done in {elapsed_time} seconds")
@@ -44,6 +45,7 @@ default_model = scispacy_lg
 nlp_models: Dict[str, NlpModel] = {
     "default": default_model,
     "scispacy_lg": scispacy_lg,
+    "biosentvec": biosentvec,
 }
 NlpModelsEnum = Enum(  # type: ignore
     "NlpModelsEnum", {_: _ for _ in nlp_models.keys()}
@@ -68,7 +70,20 @@ model_info: ModelInfo = {
             "vector_dim": 200,
             "ner": True,
             "svo": True,
-        }
+        },
+        "biosentvec": {
+            "desc": """
+            BioSentVec_PubMed_MIMICIII-bigram_d700
+            """,
+            "vector": True,
+            "vector_dim": 700,
+            "ner": False,
+            "svo": False,
+        },
     },
 }
 model_info["models"]["default"] = model_info["models"]["scispacy_lg"]
+ner_models = ["default", "scispacy_lg"]
+svo_models = ["default", "scispacy_lg"]
+spacy_models = ["default", "scispacy_lg"]
+biosentvec_models = ["biosentvec"]

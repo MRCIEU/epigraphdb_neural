@@ -53,12 +53,11 @@ params = [
             "nlp_model": "default",
         },
     ),
-    # # TODO
-    # ("models_api", "/nlp/encode", "POST", {
-    #     "text_list": ["body mass index", "obesity"],
-    #     "asis": True,
-    #     "nlp_model": "biosentvec"
-    # }),
+    ("models_api", "/nlp/encode", "POST", {
+        "text_list": ["body mass index", "obesity"],
+        "asis": True,
+        "nlp_model": "biosentvec"
+    }),
     (
         "models_api",
         "/nlp/similarity",
@@ -71,13 +70,12 @@ params = [
         "GET",
         {"text1": "obesity", "text2": "body", "nlp_model": "scispacy_lg"},
     ),
-    # # TODO
-    # (
-    #     "models_api",
-    #     "/nlp/similarity",
-    #     "GET",
-    #     {"text1": "obesity", "text2": "body", "nlp_model": "biosentvec"},
-    # ),
+    (
+        "models_api",
+        "/nlp/similarity",
+        "GET",
+        {"text1": "obesity", "text2": "body", "nlp_model": "biosentvec"},
+    ),
     # # Not doing them for now
     # ("models_api", "/nlp/ner", "GET", TODO),
     # ("models_api", "/nlp/svo", "GET", TODO),
@@ -95,4 +93,5 @@ def test_responses(component, route, method, request_payload):
         "payload": request_payload,
     }
     r = client.post(url, json=payload)
+    r.raise_for_status()
     assert r.ok

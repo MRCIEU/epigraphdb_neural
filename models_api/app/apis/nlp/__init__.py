@@ -1,8 +1,10 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
+import numpy as np
 import spacy
 import textacy
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from scipy.spatial import distance
 from textacy import extract
 
 from app import nlp_models
@@ -25,17 +27,35 @@ def get_encode(
     asis: bool = False,
     nlp_model: nlp_models.NlpModelsEnum = nlp_models.NlpModelsEnum.default,
 ) -> models.GetEncodeDict:
+    def _spacy(text, asis, model):
+        if asis:
+            clean_text = text
+        else:
+            clean_text = text_processing.preprocess_encode(
+                text=text, nlp_model=nlp
+            )
+        doc = model(clean_text)
+        vector = doc.vector.tolist()
+        res: models.GetEncodeDict = {
+            "clean_text": clean_text,
+            "results": vector,
+        }
+        return res
+
+    def _biosentvec(text, model):
+        vector = model.embed_sentence(text).reshape(-1).tolist()
+        res: models.GetEncodeDict = {"clean_text": text, "results": vector}
+        return res
+
     nlp = nlp_models.nlp_models[nlp_model.value]
-    if asis:
-        clean_text = text
+    model_name = nlp_model.value
+    model = nlp_models.nlp_models[model_name]
+    if model_name in nlp_models.spacy_models:
+        return _spacy(text=text, asis=asis, model=model)
+    elif model_name in nlp_models.biosentvec_models:
+        return _biosentvec(text=text, model=model)
     else:
-        clean_text = text_processing.preprocess_encode(
-            text=text, nlp_model=nlp
-        )
-    doc = nlp(clean_text)
-    vector = doc.vector.tolist()
-    res: models.GetEncodeDict = {"clean_text": clean_text, "results": vector}
-    return res
+        raise HTTPException(status_code=422, detail="model not supported")
 
 
 @router.post("/nlp/encode", response_model=models.PostEncodeResponse)
@@ -43,22 +63,42 @@ def post_encode(
     input: models.PostEncodeInput,
     nlp_model: nlp_models.NlpModelsEnum = nlp_models.NlpModelsEnum.default,
 ) -> models.PostEncodeDict:
-    text_list = input.text_list
-    nlp = nlp_models.nlp_models[nlp_model.value]
-    if input.asis:
-        clean_text_list = text_list
-    else:
-        clean_text_list = [
-            text_processing.preprocess_encode(text=_, nlp_model=nlp)
-            for _ in text_list
+    def _spacy(text_list, asis, model):
+        if asis:
+            clean_text_list = text_list
+        else:
+            clean_text_list = [
+                text_processing.preprocess_encode(text=_, nlp_model=model)
+                for _ in text_list
+            ]
+        docs = [model(_) for _ in clean_text_list]
+        vector_list = [_.vector.tolist() for _ in docs]
+        res: models.PostEncodeDict = {
+            "clean_text": clean_text_list,
+            "results": vector_list,
+        }
+        return res
+
+    def _biosentvec(text_list, model):
+        vector_list = [
+            model.embed_sentence(_).reshape(-1).tolist() for _ in text_list
         ]
-    docs = [nlp(_) for _ in clean_text_list]
-    vector_list = [_.vector.tolist() for _ in docs]
-    res: models.PostEncodeDict = {
-        "clean_text": clean_text_list,
-        "results": vector_list,
-    }
-    return res
+        res: models.PostEncodeDict = {
+            "clean_text": text_list,
+            "results": vector_list,
+        }
+        return res
+
+    text_list = input.text_list
+    model_name = nlp_model.value
+    model = nlp_models.nlp_models[model_name]
+    asis = input.asis
+    if model_name in nlp_models.spacy_models:
+        return _spacy(text_list=text_list, asis=asis, model=model)
+    elif model_name in nlp_models.biosentvec_models:
+        return _biosentvec(text_list=text_list, model=model)
+    else:
+        raise HTTPException(status_code=422, detail="model not supported")
 
 
 @router.get("/nlp/similarity", response_model=float)
@@ -67,22 +107,39 @@ def get_similarity(
     text2: str,
     nlp_model: nlp_models.NlpModelsEnum = nlp_models.NlpModelsEnum.default,
     asis: bool = True,
-) -> float:
-    nlp = nlp_models.nlp_models[nlp_model.value]
-    if asis:
-        text1_input = text1
-        text2_input = text2
+) -> Optional[float]:
+    def _spacy(text1, text2, asis, model):
+        if asis:
+            text1_input = text1
+            text2_input = text2
+        else:
+            text1_input = text_processing.preprocess_encode(
+                text=text1, nlp_model=model
+            )
+            text2_input = text_processing.preprocess_encode(
+                text=text2, nlp_model=model
+            )
+        doc1 = model(text1_input)
+        doc2 = model(text2_input)
+        res = doc1.similarity(doc2)
+        return res
+
+    def _biosentvec(text1, text2, model):
+        vec1 = model.embed_sentence(text1)
+        vec2 = model.embed_sentence(text2)
+        res = 1 - distance.cosine(vec1, vec2)
+        if np.isnan(res):
+            return None
+        return res
+
+    model_name = nlp_model.value
+    model = nlp_models.nlp_models[model_name]
+    if model_name in nlp_models.spacy_models:
+        return _spacy(text1=text1, text2=text2, asis=asis, model=model)
+    elif model_name in nlp_models.biosentvec_models:
+        return _biosentvec(text1=text1, text2=text2, model=model)
     else:
-        text1_input = text_processing.preprocess_encode(
-            text=text1, nlp_model=nlp
-        )
-        text2_input = text_processing.preprocess_encode(
-            text=text2, nlp_model=nlp
-        )
-    doc1 = nlp(text1_input)
-    doc2 = nlp(text2_input)
-    res = doc1.similarity(doc2)
-    return res
+        raise HTTPException(status_code=422, detail="model not supported")
 
 
 @router.get("/nlp/ner", response_model=List[models.GetNerItem])
@@ -101,6 +158,8 @@ def get_ner(
         }
         return res
 
+    if nlp_model.value not in nlp_models.ner_models:
+        raise HTTPException(status_code=422, detail="model not supported")
     nlp = nlp_models.nlp_models[nlp_model.value]
     doc = nlp(text)
     res = [_process(_) for _ in doc.ents]
@@ -123,6 +182,8 @@ def get_svo(
         }
         return res
 
+    if nlp_model.value not in nlp_models.svo_models:
+        raise HTTPException(status_code=422, detail="model not supported")
     nlp = nlp_models.nlp_models[nlp_model.value]
     doc = nlp(text)
     svos = list(extract.subject_verb_object_triples(doc))
