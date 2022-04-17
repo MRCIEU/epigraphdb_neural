@@ -3,7 +3,7 @@ from fastapi import FastAPI
 
 from epigraphdb_common_utils import neural_env_configs
 
-from .apis import nlp, ontology, query
+from .apis import components, nlp, ontology, query
 
 TITLE = "`epigraphdb_neural` API"
 app = FastAPI(title=TITLE, docs_url="/")
@@ -32,3 +32,4 @@ def get_ping(dependencies: bool = True):
 app.include_router(query.router)
 app.include_router(nlp.router)
 app.include_router(ontology.router)
+app.include_router(components.router)

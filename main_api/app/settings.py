@@ -9,6 +9,7 @@ models_api_url = env_configs["models_api_url"]
 transformers_api_url = env_configs["transformers_api_url"]
 
 # params
+VALID_COMPONENT_NAMES = ["transformers_api", "models_api"]
 NUM_ENCODE_LIMIT = 200
 NUM_SIM_LIMIT = 9
 NUM_ONTOLOGY_DISTANCE_LIMIT = 10
