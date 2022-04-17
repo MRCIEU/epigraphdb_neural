@@ -1,9 +1,10 @@
 import time
 from enum import Enum
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, Any
 
 import spacy
 from loguru import logger
+import sent2vec
 from typing_extensions import TypedDict
 
 from . import config
@@ -23,14 +24,15 @@ class ModelInfo(TypedDict):
     meta: Dict[str, str]
     models: Dict[str, ModelInfoItem]
 
-
-NlpModel = Union[spacy.language.Language]
+NlpModel = Union[spacy.language.Language, sent2vec.Sent2vecModel]
 
 # ==== loading models ====
 
 logger.info("Loading models")
 start_time = time.time()
 scispacy_lg: spacy.language.Language = spacy.load(config.SCISPACY_LG)
+sent2vec_model = sent2vec.Sent2vecModel()
+sent2vec_model.load_model(str(config.BIOSENVEC_PATH))
 finish_time = time.time()
 elapsed_time = round(finish_time - start_time, 2)
 logger.info(f"Loading models done in {elapsed_time} seconds")
